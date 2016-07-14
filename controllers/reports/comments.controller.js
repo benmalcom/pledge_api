@@ -63,9 +63,11 @@ exports.saveComment = function (req,res) {
                         };
                         if(result.affectedRows)
                         {
-                            var goToUrl = config.apiPrefix+'/reports/'+commentData.report_id+'/followers?extraParams='+JSON.stringify(pageInfo);
+                            console.log("report comment posted");
+                            res.status(200).json(outputFormat.generalResponse(pageInfo));
+                            /*var goToUrl = config.apiPrefix+'/reports/'+commentData.report_id+'/followers?extraParams='+JSON.stringify(pageInfo);
                             console.log("go to url ",goToUrl);
-                            res.redirect(goToUrl);
+                            res.redirect(goToUrl);*/
                         }
                         else
                         {

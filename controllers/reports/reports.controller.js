@@ -383,6 +383,57 @@ exports.getReportAndFollowersById = function (req,res) {
 
 };
 
+exports.getReportAndUpdatesById = function (req,res) {
+    var reportId = validator.escape(req.params.id),
+        pageInfo = {};
+    pageInfo.statusCode = 200;
+    pageInfo.dataName = "updates";
+
+    if(req.query.extraParams)
+    {
+        console.log('extra params found ');
+        var extraParams = JSON.parse(req.query.extraParams);
+        for(var i in extraParams)
+        {
+            if(extraParams.hasOwnProperty(i))
+            {
+                pageInfo[i] = extraParams[i];
+            }
+        }
+    }
+
+    pool.getConnection(function(err,connection){
+        if (err) {
+            res.status(503).json(outputFormat.generalOutputFormat(503,"We could not connect to our database at this time"));
+            console.error({"message" : "Error in connecting to database","Error":err.stack});
+            return;
+        }
+        console.log('connected as id ' + connection.threadId);
+
+        var queryString = 'SELECT a.*,b.first_name,b.last_name,b.avatar FROM report_updates a ' +
+            'INNER JOIN mobile_users b ON a.mobile_user_id = b.mobile_user_id ' +
+            'WHERE a.report_id = ? ' +
+            'ORDER BY a.created_at DESC';
+        var query = connection.query(queryString,[reportId],function(err, updates) {
+            connection.release();
+            if (err) {
+                console.error('Error executing query: ' + err.stack);
+                res.json(outputFormat.generalOutputFormat(503,"We encountered an error in getting updates for this report"));
+            }
+            else
+            {
+                console.log('updates ',updates);
+                pageInfo.totalCount = updates.length;
+                res.status(200).json(outputFormat.dataResponse(updates,pageInfo));
+            }
+        });
+
+    });
+
+};
+
+
+
 exports.modifyReport = function (req,res) {
     if(req.body)
     {

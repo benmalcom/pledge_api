@@ -58,9 +58,10 @@ exports.saveUpdate = function (req,res) {
                         if(result.affectedRows)
                         {
                             console.log("report update posted");
-                            var goToUrl = config.apiPrefix+'/reports/'+updateData.report_id+'/followers?extraParams='+JSON.stringify(pageInfo);
+                            res.status(200).json(outputFormat.generalResponse(pageInfo));
+                            /*var goToUrl = config.apiPrefix+'/reports/'+updateData.report_id+'/followers?extraParams='+JSON.stringify(pageInfo);
                             console.log("go to url ",goToUrl);
-                            res.redirect(goToUrl);
+                            res.redirect(goToUrl);*/
                         }
                         else
                         {

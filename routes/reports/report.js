@@ -30,9 +30,14 @@ router.post('/reports/modify',reportsController.modifyReport);
 //reports and comments
 router.route('/reports/:id/comments')
     .get(reportsController.getReportAndCommentById);
-//reports and comments
+//reports and followers
 router.route('/reports/:id/followers')
     .get(reportsController.getReportAndFollowersById);
+
+//reports and updates
+router.route('/reports/:id/updates')
+    .get(reportsController.getReportAndUpdatesById);
+
 
 
 //Get a single report

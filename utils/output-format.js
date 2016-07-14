@@ -7,6 +7,7 @@ var _ = require('underscore'),
 
 module.exports = {
     dataResponse : function(objectsArray,pageInfo){
+        var response = {};
         if(pageInfo && pageInfo.success)
         {
             response.success = pageInfo.success;
@@ -15,7 +16,6 @@ module.exports = {
         {
             response.message = pageInfo.message;
         }
-        var response = {};
         response.status_code = pageInfo.statusCode;
         response.developer_error_message = statusCodeToMessage(pageInfo.statusCode);
         response.user_error_message = pageInfo.mssg ? pageInfo.mssg : "";
