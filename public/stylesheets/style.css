@@ -1,0 +1,62 @@
+@import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,700);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700);
+@import url(http://fonts.googleapis.com/css?family=Noto+Sans:400,700);
+
+body {
+    font-size: 14px;
+    font-family: 'Lato', sans-serif;
+}
+
+
+a {
+  color: #00B7FF;
+    text-decoration: none !important;
+}
+
+.white-background{
+    background-color: #fff;
+    box-shadow: 0 0 1px #000;
+}
+.shadow{
+    box-shadow:  0 0 1px #555 !important;
+}
+
+.side-menu a{
+   display: block;
+    padding-top: 17px;
+    padding-bottom: 17px;
+}
+ul,li{
+    list-style: none;
+}
+.opaque{
+ opacity: 0.8;
+}
+.simplebox {
+    outline: none;
+    border: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+    border-radius: 2px !important;
+}
+p{
+    line-height: 2em !important;
+    text-align: justify;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 10px;
+}
+.footer {
+    position: absolute;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    background-color: #f5f5f5;
+}

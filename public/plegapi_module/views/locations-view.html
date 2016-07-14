@@ -1,0 +1,71 @@
+<div class="alert alert-success simplebox">
+    <h3><strong>/plegapi/v1/states</strong></h3>
+</div>
+<hr>
+<div>
+    <h4><strong>GET</strong></h4>
+    <p>
+        Sending a get request to this API endpoint returns an array of JSON objects of all the states available on that resource, with each array
+        element(i.e a report) in JSON format or it returns an empty array if no state is available on the resource.
+    </p>
+    <div class="well well-lg simplebox">
+        <strong><u>Example</u></strong><br>
+        <h5>GET http://www.example.com/plegapi/v1/states </h5>
+        <h5>RETURNS array of states [{state1},{state2},{state3}....] or an empty array [].</h5>
+    </div>
+
+</div>
+<hr>
+
+<div class="alert alert-success simplebox">
+    <h3><strong>/plegapi/v1/states/{id}/lgas</strong></h3>
+</div>
+<hr>
+<div>
+    <h4><strong>GET</strong></h4>
+    <p>
+        Sending a get request to this API endpoint returns an array of JSON objects of all the lgas under the state having the id supplied in the url, with each array
+        element(i.e an lga) in JSON format or it returns an empty array if no state is available on the resource or if the states exists with no associated lga.
+    </p>
+    <div class="well well-lg simplebox">
+        <strong><u>Example</u></strong><br>
+        <h5>GET http://www.example.com/plegapi/v1/states/2/lgas </h5>
+        <h5>RETURNS array of lgas under the state with id of 2 [{lga1},{lga2},{lga3}....] or an empty array [].</h5>
+    </div>
+
+</div>
+<div class="alert alert-success simplebox">
+    <h3><strong>/plegapi/v1/states/{id}</strong></h3>
+</div>
+<hr>
+<div>
+    <h4><strong>GET</strong></h4>
+    <p>
+        Sending a get request to this API endpoint returns an object containing a state with the id supplied or an empty object
+        if such report is non-existent.
+    </p>
+    <div class="well well-lg simplebox">
+        <strong><u>Example</u></strong><br>
+        <h5>GET http://www.example.com/plegapi/v1/states/2 </h5>
+        <h5>RETURNS an object in the form {"state_id":"****".....} or an empty object {}.</h5>
+    </div>
+
+
+
+    <div class="alert alert-success simplebox">
+        <h3><strong>/plegapi/v1/lgas/{id}</strong></h3>
+    </div>
+    <hr>
+    <div>
+        <h4><strong>GET</strong></h4>
+        <p>
+            Sending a get request to this API endpoint returns an object containing an lga with the id supplied or an empty object
+            if such lga is non-existent.
+        </p>
+        <div class="well well-lg simplebox">
+            <strong><u>Example</u></strong><br>
+            <h5>GET http://www.example.com/plegapi/v1/lgas/2 </h5>
+            <h5>RETURNS an object in the form {"lag_id":2,"*****":"*****","state_id":"****"} or an empty object {}.</h5>
+        </div>
+</div>
+    </div>

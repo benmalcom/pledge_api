@@ -1,0 +1,73 @@
+<div class="alert alert-success simplebox">
+    <h3><strong>/plegapi/v1/users</strong></h3>
+</div>
+<hr>
+<div>
+    <h4><strong>GET</strong></h4>
+    <p>
+        Sending a get request to this API endpoint returns an array of JSON objects of all the users available on that resource, with each array
+        element(i.e a user) in JSON format or it returns an empty array if no user is available on the resource.
+    </p>
+    <div class="well well-lg simplebox">
+        <strong><u>Example</u></strong><br>
+        <h5>GET http://www.example.com/plegapi/v1/users. </h5>
+        <h5>RETURNS array of users [{user1},{user2},{user3}....] or an empty array [].</h5>
+    </div>
+
+</div>
+<hr>
+<div>
+    <h4><strong>POST</strong></h4>
+    <p>
+        Sending a post request to this API endpoint(mostly from a form field), is a request to create a new user. This request must be authorized,
+        hence, the form field must contain parameters, which will also include an <b>api_id</b> and <b>api_key</b> field for authorization.
+        If this request is successful, it returns the newly created user to the request sender, in JSON format.
+        <br>
+        REQUIRED PARAMETERS => first_name,last_name,gender,mobile,email also api_key and api_id(this is compulsory for authorization);
+        <br> OPTIONAL PARAMETERS => lga_id,avatar
+
+    </p>
+    <div class="well well-lg simplebox">
+        <strong><u>Example</u></strong><br>
+        <h5>POST http://www.example.com/plegapi/v1/users. </h5>
+        <h5>RETURNS a JSON object of the created user {"mobile_user_id":'new_user_id',"first_name":"*****","last_name":"****",.......}</h5>
+    </div>
+
+</div>
+
+<div class="alert alert-success simplebox">
+    <h3><strong>/plegapi/v1/users/{id}</strong></h3>
+</div>
+<hr>
+<div>
+    <h4><strong>GET</strong></h4>
+    <p>
+        Sending a get request to this API endpoint returns an object containing a user with the id supplied or an empty object
+        if such user is non-existent.
+    </p>
+    <div class="well well-lg simplebox">
+        <strong><u>Example</u></strong><br>
+        <h5>GET http://www.example.com/plegapi/v1/users/2 </h5>
+        <h5>RETURNS an object in the form {"mobile_user_id":2,"first_name":"*****","last_name":"****"} or an empty object {}.</h5>
+    </div>
+
+</div>
+<hr>
+<div>
+    <h4><strong>PUT</strong></h4>
+    <p>
+        Sending a put request to this API endpoint(mostly from a form field), is a request to update an existing user. This request must be authorized,
+        hence, the form field must contain parameters, which will also include an <b>api_id</b> and <b>api_key</b> field for authorization.
+        If this request is successful, it returns the newly updated user data back to the request sender, in JSON format.<br>
+        REQUIRED PARAMETERS => user parameters to update e.g first_name,last_name,gender,mobile,email,lga_id,avatar and also api_key and api_id(this is compulsory for authorization);
+        <br>
+        <strong>NOTE</strong> the id parameter in the url is the id of the user's data which you are updating.
+
+    </p>
+    <div class="well well-lg simplebox">
+        <strong><u>Example</u></strong><br>
+        <h5>PUT http://www.example.com/plegapi/v1/users/3 </h5>
+        <h5>RETURNS a JSON object of the updated user {"mobile_user_id":3,"first_name":"*****","last_name":"****",.......}</h5>
+    </div>
+
+</div>
