@@ -67,6 +67,7 @@ module.exports = {
                         }
                         report.created_at = currentObject.created_at;
                         report.updated_at = currentObject.updated_at;
+                        report.user.mobile_user_id = currentObject.mobile_user_id;
                         report.user.first_name = currentObject.first_name;
                         report.user.last_name = currentObject.last_name;
                         report.user.avatar = currentObject.avatar;
