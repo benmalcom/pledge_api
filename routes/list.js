@@ -7,7 +7,8 @@ var outputFormat = require('../utils/output-format');
 module.exports = function (app) {
     var routes = require('./index');
     var users = require('./users/api');
-    var locations = require('./locations/api');
+    var states = require('./states/api');
+    var lgas = require('./lgas/api');
     var reports = require('./reports/report');
     var sectors = require('./sectors/api');
     var comments = require('./reports/report-comments');
@@ -18,7 +19,8 @@ module.exports = function (app) {
 
     app.use('/', routes);
     app.use(config.apiPrefix, users);
-    app.use(config.apiPrefix, locations);
+    app.use(config.apiPrefix, states);
+    app.use(config.apiPrefix, lgas);
     app.use(config.apiPrefix, reports);
     app.use(config.apiPrefix, sectors);
     app.use(config.apiPrefix, comments);

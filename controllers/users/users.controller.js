@@ -250,12 +250,12 @@ exports.getUserReportsById = function(req,res){
                 'CASE ISNULL((SELECT report_follower_id FROM report_followers  WHERE report_id = a.report_id AND mobile_user_id='+mobileUserId+' LIMIT 1)) '+
                     'WHEN 0 THEN 1 WHEN 1 THEN 0 end AS followed,'+
 
-                'a.report_id, a.title, a.description, a.images, a.created_at, a.updated_at, b.mobile_user_id, b.first_name,b.last_name, b.avatar,' +
-                'c.sector, d.state AS report_state, e.country, e.state AS gps_state, e.lga_city,e.address FROM reports a '+
+                'a.report_id, a.title, a.description, a.images,a.address,a.gps,a.created_at, a.updated_at, b.mobile_user_id, b.first_name,b.last_name, b.avatar,' +
+                'c.sector, d.state AS report_state, e.lga FROM reports a '+
                 'JOIN mobile_users b ON a.mobile_user_id = b.mobile_user_id '+
                 'INNER JOIN sectors c ON a.sector_id = c.sector_id '+
                 'INNER JOIN states d ON a.state_id = d.state_id '+
-                'LEFT OUTER JOIN locations e ON a.location_id = e.location_id '+
+                'INNER JOIN lgas e ON a.lga_id = e.lga_id '+
                 'WHERE a.mobile_user_id=? AND a.spam = ? ORDER BY a.created_at DESC LIMIT '+offset+', '+nextTotalItem;
 
 

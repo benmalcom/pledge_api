@@ -32,12 +32,12 @@ exports.reportIdParam = function(req,res,next,id){
             '(SELECT  COUNT(report_id) FROM report_comments WHERE report_id=a.report_id) AS comments,'+
             '(SELECT COUNT(report_id) FROM report_votes WHERE report_id=a.report_id) AS votes, '+
             '(SELECT COUNT(report_id) FROM report_followers WHERE report_id=a.report_id) AS followers,'+additionalQuery+
-            'a.report_id, a.title, a.description, a.images,a.created_at, a.updated_at, b.mobile_user_id, b.first_name,b.last_name, b.avatar,' +
-            'c.sector, d.state AS report_state, e.country, e.state AS gps_state, e.lga_city,e.address FROM reports a '+
+            'a.report_id, a.title, a.description, a.images,a.address,a.gps,a.created_at, a.updated_at, b.mobile_user_id, b.first_name,b.last_name, b.avatar,' +
+            'c.sector, d.state AS report_state, e.lga FROM reports a '+
             'JOIN mobile_users b ON a.mobile_user_id = b.mobile_user_id '+
             'INNER JOIN sectors c ON a.sector_id = c.sector_id '+
             'INNER JOIN states d ON a.state_id = d.state_id '+
-            'LEFT OUTER JOIN locations e ON a.location_id = e.location_id '+
+            'INNER JOIN lgas e ON a.lga_id = e.lga_id '+
             'WHERE a.report_id=? AND a.spam = ?';
         var data = [sanitize(id),0];
         var query = connection.query(queryString,data,function(err, report) {
@@ -118,13 +118,13 @@ exports.all = function(req,res){
         '(SELECT COUNT(report_id) FROM report_votes WHERE report_id=a.report_id) AS votes,'+
         '(SELECT COUNT(report_id) FROM report_followers WHERE report_id=a.report_id) AS followers,'+
         '(SELECT  COUNT(report_id) FROM report_comments WHERE report_id=a.report_id) AS comments,'+additionalQuery+
-        'a.report_id, a.title, a.description, a.images,a.created_at, a.updated_at, b.mobile_user_id, b.first_name,b.last_name, b.avatar,' +
-        'c.sector, d.state AS report_state, e.country, e.state AS gps_state, e.lga_city,e.address FROM reports a '+
-        'JOIN mobile_users b ON a.mobile_user_id = b.mobile_user_id '+
-        'INNER JOIN sectors c ON a.sector_id = c.sector_id '+
-        'INNER JOIN states d ON a.state_id = d.state_id '+
-        'LEFT OUTER JOIN locations e ON a.location_id = e.location_id '+
-        'WHERE a.spam = ? ORDER BY a.created_at DESC LIMIT '+offset+', '+nextTotalItem;
+            'a.report_id, a.title, a.description, a.images,a.address,a.gps,a.created_at, a.updated_at, b.mobile_user_id, b.first_name,b.last_name, b.avatar,' +
+            'c.sector, d.state AS report_state, e.lga FROM reports a '+
+            'JOIN mobile_users b ON a.mobile_user_id = b.mobile_user_id '+
+            'INNER JOIN sectors c ON a.sector_id = c.sector_id '+
+            'INNER JOIN states d ON a.state_id = d.state_id '+
+            'INNER JOIN lgas e ON a.lga_id = e.lga_id '+
+            'WHERE a.spam = ? ORDER BY a.created_at DESC LIMIT '+offset+', '+nextTotalItem;
 
 
         var query = connection.query(queryString,[0],function(err, reports) {
@@ -190,6 +190,7 @@ exports.saveReport = function (req,res) {
             sector_id: req.body.sector_id,
             mobile_user_id : req.body.mobile_user_id,
             state_id : req.body.state_id,
+            lga_id : req.body.lga_id,
             report_time : req.body.report_time
         };
 
@@ -198,46 +199,25 @@ exports.saveReport = function (req,res) {
             sector_id: 'required|numeric|min:1',
             mobile_user_id : 'required|numeric|min:1',
             state_id: 'required|numeric|min:1',
+            lga_id: 'required|numeric|min:1',
             report_time: 'required'
         };
         var validation = new ValidatorJs(reportData,rules);
 
         if(validation.passes())
         {
-            console.log('passed validation!');
-            var country = req.body.country ?  sanitize(req.body.country) : "Nigeria",
-                state = req.body.state ?  sanitize(req.body.state) : null,
-                lga_city = req.body.lga_city ?  sanitize(req.body.lga_city) : null,
-                address = req.body.address ?  sanitize(req.body.address) : null;
-            pool.getConnection(function(err,connection){
-                if (err) {
-                    res.status(503).json(outputFormat.generalOutputFormat(503,"We could not connect to our database at this time"));
-                    console.error({"message" : "Error in connecting to database","Error":err.stack});
-                    return;
-                }
+            console.log('passed report validation!');
 
-                var data = [country,state,lga_city,address],
-                    query = 'INSERT INTO locations(country,state,lga_city,address) VALUES(?,?,?,?)';
-
-
-                connection.query(query,data,function(err,result){
-                    connection.release();
-                    if(err)
-                    {
-                        console.error('Error executing query: ' + err.stack);
-                        res.status(503).json(outputFormat.generalOutputFormat(503,"We encountered an error in saving your location data"));
-
-                    }
-                    else if(result.insertId)
-                    {
-                        var locationId = result.insertId;
                         var title = sanitize(req.body.title),
                             sector_id = sanitize(req.body.sector_id),
                             mobile_user_id = sanitize(req.body.mobile_user_id),
+                            lga_id = sanitize(req.body.lga_id),
                             state_id = sanitize(req.body.state_id),
                             report_time = dateFormat(Date.parse(sanitize(validator.toDate(req.body.report_time))), "yyyy-mm-dd hh:MM:ss"),
-                            description = req.body.description ? sanitize(req.body.description) : "",
+                            description = req.body.description ? sanitize(req.body.description) : null,
                             images = req.body.media ? sanitize(req.body.media) : null;
+                            gps = req.body.gps ?  sanitize(req.body.gps) : null;
+                            address = req.body.address ?  sanitize(req.body.address) : null;
 
                         pool.getConnection(function(err,connection){
                             if (err) {
@@ -246,8 +226,8 @@ exports.saveReport = function (req,res) {
                                 return;
                             }
 
-                            var data = [title,description,report_time,images,sector_id,state_id,mobile_user_id,locationId,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")],
-                                query = 'INSERT INTO reports(title,description,report_time,images,sector_id,state_id,mobile_user_id,location_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)';
+                            var data = [title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")],
+                                query = 'INSERT INTO reports(title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)';
 
 
                             connection.query(query,data,function(err,result){
@@ -273,19 +253,6 @@ exports.saveReport = function (req,res) {
                             });
 
                         });
-                    }
-                    else
-                    {
-                        res.status(503).json(outputFormat.generalOutputFormat(503,"We encountered an error in saving your location data"));
-
-                    }
-                });
-
-            });
-
-
-
-
         }
         else{
             res.status(400).json(outputFormat.generalOutputFormat(400,"Some field were omitted"));
