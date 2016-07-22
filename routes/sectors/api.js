@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var sectors = require('../../controllers/sectors/sectors.controller');
 var sanitize = require('../../utils/cleaner');
+var config = require('../../config/config');
+
 
 
 
