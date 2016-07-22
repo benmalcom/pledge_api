@@ -2,7 +2,7 @@
  * Created by Richard on 10/2/2015.
  */
 var env = process.env.NODE_ENV;
-/*module.exports = {
+module.exports = {
     dbHost : "45.40.137.227",
     dbName : "rcecilee_pleg",
     dbUsername : "rcecilee_pleg",
@@ -10,8 +10,8 @@ var env = process.env.NODE_ENV;
     apiPrefix : "/v1",
     baseUrl : env == 'development' ?  "http://localhost:3000" : "http://api.rcecilee.com",
     reportItemsPerPage : 10
-};*/
-
+};
+/*
 module.exports = {
  dbHost : "127.0.0.1",
  dbName : "pleg",
@@ -20,7 +20,7 @@ module.exports = {
  apiPrefix : "/v1",
  baseUrl : env == 'development' ?  "http://localhost:3000" : "http://api.rcecilee.com",
  reportItemsPerPage : 10
- };
+ };*/
 
 
 
