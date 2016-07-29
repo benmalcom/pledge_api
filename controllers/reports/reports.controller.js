@@ -227,7 +227,7 @@ exports.saveReport = function (req,res) {
                             }
 
                             var data = [title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")],
-                                query = 'INSERT INTO reports(title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)';
+                                query = 'REPLACE INTO reports(title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)';
 
 
                             connection.query(query,data,function(err,result){
