@@ -300,10 +300,10 @@ exports.getUserReportsCountById = function(req,res){
             return;
         }
         console.log('connected as id ' + connection.threadId);
-        var queryString = 'SELECT COUNT(report_id) as user_reports_count FROM reports WHERE mobile_user_id=? ';
+        var queryString = 'SELECT COUNT(report_id) as user_reports_count FROM reports WHERE mobile_user_id=? AND spam=? ';
 
 
-        var query = connection.query(queryString,[mobileUserId],function(err, count) {
+        var query = connection.query(queryString,[mobileUserId,0],function(err, count) {
             connection.release();
             if (err) {
                 console.error('Error executing query: ' + err.stack);
@@ -319,6 +319,7 @@ exports.getUserReportsCountById = function(req,res){
     });
 
 };
+
 
 exports.saveUser = function (req,res) {
     if(req.body)

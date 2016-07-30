@@ -161,10 +161,10 @@ exports.getTotalReportsCount = function(req,res){
             return;
         }
         console.log('connected as id ' + connection.threadId);
-        var queryString = 'SELECT COUNT(*) as total_reports_count FROM reports';
+        var queryString = 'SELECT COUNT(*) as total_reports_count FROM reports WHERE spam=?';
+        var data = [0];
 
-
-        var query = connection.query(queryString,function(err, result) {
+        var query = connection.query(queryString,data,function(err, result) {
             connection.release();
             if (err) {
                 console.error('Error executing query: ' + err.stack);
