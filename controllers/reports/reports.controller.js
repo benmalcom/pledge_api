@@ -3,7 +3,6 @@
  */
 var ValidatorJs = require('validatorjs');
 var validator = require('validator');
-var uuid = require('uuid');
 var _ = require('underscore');
 var dateFormat = require('dateformat');
 var needle = require('needle');
@@ -13,7 +12,6 @@ var sanitize = require('../../utils/cleaner');
 var helper = require('../../utils/helper');
 var outputFormat = require('../../utils/output-format');
 var io = require('../../server/io');
-
 
 exports.reportIdParam = function(req,res,next,id){
     var loggedInUserId = sanitize(req.query.loggedInUserId);
@@ -182,6 +180,84 @@ exports.getTotalReportsCount = function(req,res){
 
 };
 
+exports.reportExists = function (req,res) {
+    if(req.body)
+    {
+        var reportData = {
+            title: req.body.title,
+            sector_id: req.body.sector_id,
+            mobile_user_id : req.body.mobile_user_id,
+            state_id : req.body.state_id,
+            lga_id : req.body.lga_id
+        };
+
+        var rules = {
+            title: 'required',
+            sector_id: 'required|numeric|min:1',
+            mobile_user_id : 'required|numeric|min:1',
+            state_id: 'required|numeric|min:1',
+            lga_id: 'required|numeric|min:1'
+        };
+        var validation = new ValidatorJs(reportData,rules);
+
+        if(validation.passes())
+        {
+            var title = sanitize(req.body.title),
+                sector_id = sanitize(req.body.sector_id),
+                mobile_user_id = sanitize(req.body.mobile_user_id),
+                lga_id = sanitize(req.body.lga_id),
+                state_id = sanitize(req.body.state_id),
+                report_time = dateFormat(Date.parse(sanitize(validator.toDate(req.body.report_time))), "yyyy-mm-dd hh:MM:ss"),
+                description = req.body.description ? sanitize(req.body.description) : null,
+                images = req.body.media ? sanitize(req.body.media) : null;
+            gps = req.body.gps ?  sanitize(req.body.gps) : null;
+            address = req.body.address ?  sanitize(req.body.address) : null;
+
+            pool.getConnection(function(err,connection){
+                if (err) {
+                    res.status(503).json(outputFormat.generalOutputFormat(503,"We could not connect to our database at this time"));
+                    console.error({"message" : "Error in connecting to database","Error":err.stack});
+                    return;
+                }
+
+                var data = [title,description,images,sector_id,lga_id,state_id,mobile_user_id,gps,address],
+                    query = 'SELECT title,description,images,sector_id,lga_id,state_id,mobile_user_id,gps,address FROM reports ' +
+                        'WHERE title=? AND description=? AND images=? AND sector_id=? AND lga_id=? AND state_id=? AND mobile_user_id=? AND gps=? AND address = ?';
+
+
+                connection.query(query,data,function(err,result){
+                    connection.release();
+                    if(err)
+                    {
+                        console.error('Error executing query: ' + err.stack);
+                        res.status(503).json(outputFormat.generalOutputFormat(503,"We encountered an error in verifying the existence of this report"));
+
+                    }
+                    else
+                    {
+                        var pageInfo = {};
+                        pageInfo.statusCode = result.length ? 200 : 404;
+                        pageInfo.success = result.length ? true : false;
+                        pageInfo.mssg =  result.length ? "Report exists" : "Report does not exist";
+                        res.status(200).json(outputFormat.generalResponse(pageInfo));
+                    }
+                });
+
+            });
+        }
+        else{
+            console.log(validation.errors);
+            res.status(400).json(outputFormat.generalOutputFormat(400,"Some field were omitted"));
+
+        }
+
+    }
+    else{
+        res.status(400).json(outputFormat.generalOutputFormat(400,"The form submitted is empty"));
+
+    }
+};
+
 exports.saveReport = function (req,res) {
     if(req.body)
     {
@@ -191,7 +267,8 @@ exports.saveReport = function (req,res) {
             mobile_user_id : req.body.mobile_user_id,
             state_id : req.body.state_id,
             lga_id : req.body.lga_id,
-            report_time : req.body.report_time
+            report_time : req.body.report_time,
+            unique_id : req.body.unique_id
         };
 
         var rules = {
@@ -200,7 +277,8 @@ exports.saveReport = function (req,res) {
             mobile_user_id : 'required|numeric|min:1',
             state_id: 'required|numeric|min:1',
             lga_id: 'required|numeric|min:1',
-            report_time: 'required'
+            report_time: 'required',
+            unique_id: 'required'
         };
         var validation = new ValidatorJs(reportData,rules);
 
@@ -218,6 +296,7 @@ exports.saveReport = function (req,res) {
                             images = req.body.media ? sanitize(req.body.media) : null;
                             gps = req.body.gps ?  sanitize(req.body.gps) : null;
                             address = req.body.address ?  sanitize(req.body.address) : null;
+                            unique_id = sanitize(req.body.unique_id);
 
                         pool.getConnection(function(err,connection){
                             if (err) {
@@ -226,8 +305,8 @@ exports.saveReport = function (req,res) {
                                 return;
                             }
 
-                            var data = [title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")],
-                                query = 'REPLACE INTO reports(title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)';
+                            var data = [title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),unique_id],
+                                query = 'REPLACE INTO reports(title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,created_at,updated_at,unique_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
 
                             connection.query(query,data,function(err,result){

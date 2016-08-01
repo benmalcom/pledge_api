@@ -24,7 +24,7 @@
     "serve-favicon": "latest",
     "socket.io": "^1.3.7",
     "underscore": "^1.8.3",
-    "uuid": "^2.0.1",
+    "uuid": "^2.0.2",
     "validator": "latest",
     "validatorjs": "^2.0.1"
   }

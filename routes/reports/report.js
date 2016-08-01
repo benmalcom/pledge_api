@@ -24,6 +24,7 @@ router.get('/count/reports',reportsController.getTotalReportsCount);
 //modify report properties e.g spam, archive
 
 router.post('/reports/modify',reportsController.modifyReport);
+router.post('/reports/exists',reportsController.reportExists);
 
 
 
