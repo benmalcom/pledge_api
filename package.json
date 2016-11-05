@@ -1,13 +1,17 @@
 {
   "name": "plegapi",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
+  "engines": {
+    "node": "4.1.1"
+  },
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
     "body-parser": "latest",
     "compression": "^1.6.0",
+    "config": "^1.21.0",
     "cookie-parser": "latest",
     "cors": "^2.7.1",
     "csurf": "^1.8.3",
@@ -18,13 +22,12 @@
     "kerberos": "0.0.17",
     "method-override": "^2.3.5",
     "morgan": "latest",
-    "mysql": "^2.9.0",
-    "needle": "^0.10.0",
+    "promise-mysql": "^2.0.0",
+    "q": "^1.4.1",
     "sanitize-html": "^1.10.1",
     "serve-favicon": "latest",
     "socket.io": "^1.3.7",
     "underscore": "^1.8.3",
-    "uuid": "^2.0.2",
     "validator": "latest",
     "validatorjs": "^2.0.1"
   }

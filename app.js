@@ -10,8 +10,10 @@ var http = require('http');
 var cors = require('cors');
 var sanitizer = require('sanitize-html'),
     _ = require('underscore');
-var config = require('./config/config');
-
+var config = require('config');
+var formatResponse = require('./api/utils/format-response');
+var checkAuhtorization = require('./api/middlewares/check_authorization');
+var sanitize = require('./api/middlewares/sanitize');
 
 var app = express();
 
@@ -47,35 +49,13 @@ app.use(function(req, res, next) {
 });
 
 app.use(compression());
-app.use(function(req, res, next) {
-  if (req.body) {
-    _.each(req.body, function(value, key) {
-      if(!parseInt(value,10) && value !== null) {
-        if(typeof value === 'string') {
-          value = value.replace(/&gt;/gi, '>');
-          value = value.replace(/&lt;/gi, '<');
-          value = value.replace(/(&copy;|&quot;|&amp;)/gi, '');
-        }
-        req.body[key] = sanitizer(value, {
-          allowedTags: []
-        });
-      }
-    });
-  }
-  return next();
-});
+app.use(sanitize);
+app.use(checkAuhtorization);
 ////////////////////Require all route files here
-require('./routes/list')(app);
-
-/*var io = require('socket.io').listen(server);
-
-io.on('connection',function(socket){ ///that socket object inside d closure function is the one connected to ur system fom another system.
-    console.log('user connected!');
-    io.sockets.emit("new user",socket.id);
-    //everything about the socket object will happen here
+app.get('/',function (req,res,next) {
+    res.send("Pledge API!");
 });
-require('./routes/post_routes/post_routes')(app,io);*/
-
+require('./api/routes/index')(app);
 
 
 // catch 404 and forward to error handler
@@ -90,28 +70,31 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
+    app.use(function(err, req, res, next) {
+        console.log("err ",JSON.stringify(err));
+        var meta = {};
+        meta.status_code = err.code || 500;
+        meta.error =  {code: meta.status_code, message: err.message || "Error in server interaction"};
+        if(err.messages)
+            meta.error.messages = err.messages;
+        return res.status(meta.status_code).json(formatResponse.do(meta));
     });
-  });
 }
 
 // production error handler
 // no stack traces leaked to user
 app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
+    var meta = {};
+    meta.status_code = err.code || 500;
+    meta.error = {code: meta.status_code, message: err.message || "Error in server interaction"};
+    if(err.messages)
+        meta.error.messages = err.messages;
+    return res.status(meta.status_code).json(formatResponse.do(meta));
 });
 
 var server = http.createServer(app);
 server.listen(app.get('port'),function(){
     console.log('Environment ',app.get('env') === 'development' ? 'Development' : 'Production');
-    console.log('Url: '+config.baseUrl);
+    console.log('Url: '+config.get('app.baseUrl'));
 });
 module.exports = app;
