@@ -1,0 +1,30 @@
+{
+    "app":
+    {
+        "name": "pledge api",
+        "port": 4000,
+        "baseUrl": "localhost:4000"
+    },
+    "api":
+    {
+        "prefix": "/api",
+        "versions": [1]
+    },
+    "authToken":{
+        "superSecret":"ipa egdelp",
+        "expiresIn" : 86400
+    },
+    "db": {
+        "mysql": {
+            "host":"45.40.137.227",
+            "database":"rcecilee_pleg",
+            "username":"rcecilee_pleg",
+            "password":"rcecilee_pleg"
+        }
+    },
+
+    "itemsPerPage": {
+        "report": 10,
+        "default": 10
+    }
+}
