@@ -35,7 +35,7 @@ exports.reportIdParam = function(req,res,next,id){
         connection.query(query,data)
             .then(function(rows){
                 if(rows.length){
-                    req.report = rows[0];
+                    req.report = helper.processReport(rows[0]);
                     return next();
                 }
                 else {
