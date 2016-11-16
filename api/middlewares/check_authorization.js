@@ -17,14 +17,12 @@ module.exports = function(req,res,next){
               connection.query(query,data)
                   .then(function(rows){
                       var row = rows[0];
-                      if(row)
-                      {
+                      if(row) {
                           /*delete req.body.api_id;
                           delete req.body.api_key;*/
                           return next();
                       }
-                      else
-                      {
+                      else {
                           error =  helper.transformToError({code:401,message:"Invalid api id and key supplied!"});
                           return next(error);
                       }
@@ -33,6 +31,12 @@ module.exports = function(req,res,next){
                       console.log("err ",err);
                       error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                       return next(error);
+                  })
+                  .finally(function() {
+                      if (connection){
+                          connection.connection.release();
+                          console.log("Connection released!");
+                      }
                   });
           },function(err){
               error = helper.transformToError({

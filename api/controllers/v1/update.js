@@ -29,6 +29,11 @@ exports.saveUpdate = function (req,res,next) {
                     console.log("err ",err);
                     error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                     return next(error);
+                }).finally(function() {
+                    if (connection){
+                        connection.connection.release();
+                        console.log("Connection released!");
+                    }
                 });
         },function(err){
             error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});

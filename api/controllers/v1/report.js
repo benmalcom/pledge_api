@@ -42,11 +42,15 @@ exports.reportIdParam = function(req,res,next,id){
                     error =  helper.transformToError({code:404,message:"Report not found!"});
                     return next(error);
                 }
-
             },function(err){
                 console.log("err ",err);
                 error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                 return next(error);
+            }).finally(function() {
+                if (connection){
+                    connection.connection.release();
+                    console.log("Connection released!");
+                }
             });
     },function(err){
         error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});
@@ -116,7 +120,6 @@ exports.all = function(req,res,next){
         'INNER JOIN states d ON a.state_id = d.state_id '+
         'INNER JOIN lgas e ON a.lga_id = e.lga_id '+
         'WHERE a.spam = ?'+filterQuery+' ORDER BY a.created_at DESC LIMIT '+offset+', '+nextTotalItem;
-    console.log("query ",query);
     var queryData = [0];
     var countQuery  = 'SELECT COUNT(a.report_id) as count FROM reports a WHERE a.spam = ?'+filterQuery;
     var countData = [0];
@@ -129,8 +132,7 @@ exports.all = function(req,res,next){
                         .spread(function(rows,countResult){
                             var count = countResult[0].count;
                             meta.pagination.total_count = count;
-                            if(count > (page * itemsPerPage))
-                            {
+                            if(count > (page * itemsPerPage)) {
                                 var next = parseInt(page,"10") + 1;
                                 meta.pagination.previous_page = helper.appendQueryString(baseRequestUrl,"page="+next);
                                 meta.pagination.next = next;
@@ -140,6 +142,11 @@ exports.all = function(req,res,next){
                             console.log("err ",err);
                             error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                             return next(error);
+                        }).finally(function() {
+                            if (connection){
+                                connection.connection.release();
+                                console.log("Connection released!");
+                            }
                         });
                 }
                 ,function(err){
@@ -182,6 +189,11 @@ exports.saveReport = function (req,res,next) {
                             console.log("err ",err);
                             error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                             return next(error);
+                        }).finally(function() {
+                            if (connection){
+                                connection.connection.release();
+                                console.log("Connection released!");
+                            }
                         });
                 },function(err){
                     error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});
@@ -245,6 +257,11 @@ exports.getReportAndCommentById = function (req,res,next) {
                         console.log("err ",err);
                         error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                         return next(error);
+                    }).finally(function() {
+                        if (connection){
+                            connection.connection.release();
+                            console.log("Connection released!");
+                        }
                     });
             }
             ,function(err){
@@ -303,6 +320,11 @@ exports.getReportAndFollowersById = function (req,res,next) {
                         console.log("err ",err);
                         error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                         return next(error);
+                    }).finally(function() {
+                        if (connection){
+                            connection.connection.release();
+                            console.log("Connection released!");
+                        }
                     });
             }
             ,function(err){
@@ -362,6 +384,11 @@ exports.getReportAndUpdatesById = function (req,res,next) {
                             extra: err
                         });
                         return next(error);
+                    }).finally(function() {
+                        if (connection){
+                            connection.connection.release();
+                            console.log("Connection released!");
+                        }
                     });
             }
             , function (err) {
@@ -385,7 +412,8 @@ exports.modifyReport = function (req,res,next) {
                     if(tag=="spam") {
                         query = 'UPDATE reports SET spam = ?,updated_at = ? WHERE report_id = ?',
                             data = [1,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),userData.report_id];
-                    }connection.query(query,data)
+                    }
+                    connection.query(query,data)
                         .then(function(result){
                             if(result.affectedRows)
                             res.status(meta.code).json(formatResponse.do(meta));
@@ -393,7 +421,12 @@ exports.modifyReport = function (req,res,next) {
                             console.log("err ",err);
                             error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                             return next(error);
-                        });
+                        }).finally(function() {
+                            if (connection){
+                                connection.connection.release();
+                                console.log("Connection released!");
+                            }
+                        })
                 },function(err){
                     error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});
                     return next(error);
