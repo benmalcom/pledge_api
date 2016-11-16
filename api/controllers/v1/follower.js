@@ -6,7 +6,7 @@ var ValidatorJs = require('validatorjs');
 var dateFormat = require('dateformat');
 var config = require('config');var helper = require('../../utils/helper');
 var formatResponse = require('../../utils/format-response');
-var mysqlConnection = require('../../others/db/mysql_connection');
+var pool = require('../../others/db/mysql_connection');
 
 exports.saveFollower = function (req,res,next) {
     var obj = req.body,
@@ -22,7 +22,7 @@ exports.saveFollower = function (req,res,next) {
             : 'DELETE FROM report_followers WHERE report_id = ? AND mobile_user_id = ?';
         var data = tagCondition ?  [obj.mobile_user_id,obj.report_id,1,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")]
             : [parseInt(obj.report_id,"10"),parseInt(obj.mobile_user_id,"10")];
-        mysqlConnection.get().then(function(connection){
+        pool.getConnection().then(function(connection){
             connection.query(query,data)
                 .then(function(result){
                     meta.message = tagCondition ? "Following" : "Unfollowed";
@@ -34,7 +34,7 @@ exports.saveFollower = function (req,res,next) {
                 })
                 .finally(function() {
                     if (connection){
-                        connection.connection.release();
+                        pool.releaseConnection(connection);
                         console.log("Connection released!");
                     }
                 });

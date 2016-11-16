@@ -3,13 +3,13 @@
  */
 var helper = require('../../utils/helper');
 var formatResponse = require('../../utils/format-response');
-var mysqlConnection = require('../../others/db/mysql_connection');
+var pool = require('../../others/db/mysql_connection');
 
 exports.sectorIdParam = function(req,res,next,id){
     var error = {};
     var query = 'SELECT * FROM sectors WHERE sector_id=? LIMIT 1';
     var data = [helper.sanitize(id)];
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         connection.query(query,data)
             .then(function(rows){
                 if(rows.length){
@@ -28,7 +28,7 @@ exports.sectorIdParam = function(req,res,next,id){
             })
             .finally(function() {
                 if (connection){
-                    connection.connection.release();
+                    pool.releaseConnection(connection);
                     console.log("Connection released!");
                 }
             });
@@ -49,7 +49,7 @@ exports.all = function(req,res,next){
     var error = {};
     var meta = {code:200,success:true};
     var query = 'SELECT * FROM sectors';
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         connection.query(query)
             .then(function(rows){
                 res.status(meta.code).json(formatResponse.do(meta,rows));
@@ -60,7 +60,7 @@ exports.all = function(req,res,next){
             })
             .finally(function() {
                 if (connection){
-                    connection.connection.release();
+                    pool.releaseConnection(connection);
                     console.log("Connection released!");
                 }
             });

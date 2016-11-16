@@ -6,7 +6,7 @@ var ValidatorJs = require('validatorjs');
 var dateFormat = require('dateformat');
 var config = require('config');var helper = require('../../utils/helper');
 var formatResponse = require('../../utils/format-response');
-var mysqlConnection = require('../../others/db/mysql_connection');
+var pool = require('../../others/db/mysql_connection');
 
 exports.saveUpdate = function (req,res,next) {
     var obj = req.body,
@@ -19,7 +19,7 @@ exports.saveUpdate = function (req,res,next) {
     {
         var query = 'INSERT INTO report_updates(mobile_user_id,report_id,update_body,created_at,updated_at) VALUES(?,?,?,?,?)';
         var data = [obj.mobile_user_id,obj.report_id,obj.update_body,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")];
-        mysqlConnection.get().then(function(connection){
+        pool.getConnection().then(function(connection){
             connection.query(query,data)
                 .then(function(result){
                     if(result.affectedRows)
@@ -31,7 +31,7 @@ exports.saveUpdate = function (req,res,next) {
                     return next(error);
                 }).finally(function() {
                     if (connection){
-                        connection.connection.release();
+                        pool.releaseConnection(connection);
                         console.log("Connection released!");
                     }
                 });

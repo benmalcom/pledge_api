@@ -8,7 +8,7 @@ var dateFormat = require('dateformat');
 var config = require('config');
 var helper = require('../../utils/helper');
 var formatResponse = require('../../utils/format-response');
-var mysqlConnection = require('../../others/db/mysql_connection');
+var pool = require('../../others/db/mysql_connection');
 
 
 exports.reportIdParam = function(req,res,next,id){
@@ -31,7 +31,7 @@ exports.reportIdParam = function(req,res,next,id){
         'INNER JOIN lgas e ON a.lga_id = e.lga_id '+
         'WHERE a.report_id=? AND a.spam = ?';
     var data = [helper.sanitize(id),0];
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         connection.query(query,data)
             .then(function(rows){
                 if(rows.length){
@@ -48,7 +48,7 @@ exports.reportIdParam = function(req,res,next,id){
                 return next(error);
             }).finally(function() {
                 if (connection){
-                    connection.connection.release();
+                    pool.releaseConnection(connection);
                     console.log("Connection released!");
                 }
             });
@@ -123,8 +123,7 @@ exports.all = function(req,res,next){
     var queryData = [0];
     var countQuery  = 'SELECT COUNT(a.report_id) as count FROM reports a WHERE a.spam = ?'+filterQuery;
     var countData = [0];
-        mysqlConnection.get()
-            .then(function(connection){
+    pool.getConnection().then(function(connection){
                     return connection.query(query,queryData)
                         .then(function (rows) {
                             return [rows,connection.query(countQuery,countData)];
@@ -144,7 +143,7 @@ exports.all = function(req,res,next){
                             return next(error);
                         }).finally(function() {
                             if (connection){
-                                connection.connection.release();
+                                pool.releaseConnection(connection);
                                 console.log("Connection released!");
                             }
                         });
@@ -178,7 +177,7 @@ exports.saveReport = function (req,res,next) {
                             gps = obj.gps ?  helper.sanitize(obj.gps) : "",
                             address = obj.address ?  helper.sanitize(obj.address) : "",
                             unique_id = helper.sanitize(obj.unique_id);
-                mysqlConnection.get().then(function(connection){
+            pool.getConnection().then(function(connection){
                     var data = [obj.title,description,obj.report_time,images,obj.sector_id,obj.lga_id,obj.state_id,obj.mobile_user_id,gps,address,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),unique_id],
                         query = 'REPLACE INTO reports(title,description,report_time,images,sector_id,lga_id,state_id,mobile_user_id,gps,address,created_at,updated_at,unique_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)';
                     connection.query(query,data)
@@ -191,7 +190,7 @@ exports.saveReport = function (req,res,next) {
                             return next(error);
                         }).finally(function() {
                             if (connection){
-                                connection.connection.release();
+                                pool.releaseConnection(connection);
                                 console.log("Connection released!");
                             }
                         });
@@ -237,7 +236,7 @@ exports.getReportAndCommentById = function (req,res,next) {
         'ORDER BY a.created_at DESC';
     var countData = [reportId];
 
-    mysqlConnection.get()
+    pool.getConnection()
         .then(function(connection){
                 return connection.query(query,queryData)
                     .then(function (rows) {
@@ -259,7 +258,7 @@ exports.getReportAndCommentById = function (req,res,next) {
                         return next(error);
                     }).finally(function() {
                         if (connection){
-                            connection.connection.release();
+                            pool.releaseConnection(connection);
                             console.log("Connection released!");
                         }
                     });
@@ -299,7 +298,7 @@ exports.getReportAndFollowersById = function (req,res,next) {
         'ORDER BY a.created_at DESC';
     var countData = [reportId];
 
-    mysqlConnection.get()
+    pool.getConnection()
         .then(function(connection){
                 return connection.query(query,queryData)
                     .then(function (rows) {
@@ -322,7 +321,7 @@ exports.getReportAndFollowersById = function (req,res,next) {
                         return next(error);
                     }).finally(function() {
                         if (connection){
-                            connection.connection.release();
+                            pool.releaseConnection(connection);
                             console.log("Connection released!");
                         }
                     });
@@ -361,7 +360,7 @@ exports.getReportAndUpdatesById = function (req,res,next) {
         'ORDER BY a.created_at DESC';
     var countData = [reportId];
 
-    mysqlConnection.get()
+    pool.getConnection()
         .then(function (connection) {
                 return connection.query(query, queryData)
                     .then(function (rows) {
@@ -386,7 +385,7 @@ exports.getReportAndUpdatesById = function (req,res,next) {
                         return next(error);
                     }).finally(function() {
                         if (connection){
-                            connection.connection.release();
+                            pool.releaseConnection(connection);
                             console.log("Connection released!");
                         }
                     });
@@ -405,7 +404,7 @@ exports.modifyReport = function (req,res,next) {
 
             if(validation.passes())
             {
-                mysqlConnection.get().then(function(connection){
+                pool.getConnection().then(function(connection){
                     var tag = obj.tag.toLowerCase(),
                         query = "",
                         data = [];
@@ -423,7 +422,7 @@ exports.modifyReport = function (req,res,next) {
                             return next(error);
                         }).finally(function() {
                             if (connection){
-                                connection.connection.release();
+                                pool.releaseConnection(connection);
                                 console.log("Connection released!");
                             }
                         })

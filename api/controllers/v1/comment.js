@@ -6,7 +6,7 @@ var dateFormat = require('dateformat');
 var config = require('config');
 var helper = require('../../utils/helper');
 var formatResponse = require('../../utils/format-response');
-var mysqlConnection = require('../../others/db/mysql_connection');
+var pool = require('../../others/db/mysql_connection');
 
 exports.saveComment = function (req,res,next) {
     var obj = req.body,
@@ -19,7 +19,7 @@ exports.saveComment = function (req,res,next) {
     {
         var data = [obj.comment_body,obj.mobile_user_id,obj.report_id,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")],
             query = 'INSERT INTO report_comments(comment_body,mobile_user_id,report_id,created_at,updated_at) VALUES(?,?,?,?,?)';
-        mysqlConnection.get().then(function(connection){
+        pool.getConnection().then(function(connection){
             connection.query(query,data)
                 .then(function(result){
                     if(result.affectedRows)
@@ -32,7 +32,7 @@ exports.saveComment = function (req,res,next) {
                 })
                 .finally(function() {
                     if (connection){
-                        connection.connection.release();
+                        pool.releaseConnection(connection);
                         console.log("Connection released!");
                     }
                 });

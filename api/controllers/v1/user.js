@@ -7,11 +7,11 @@ var dateFormat = require('dateformat');
 var config = require('config');
 var formatResponse = require('../../utils/format-response');
 var helper = require('../../utils/helper');
-var mysqlConnection = require('../../others/db/mysql_connection');
+var pool = require('../../others/db/mysql_connection');
 
 exports.userIdParam = function(req,res,next,id){
     var error = {};
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         var query = "SELECT * FROM mobile_users WHERE mobile_user_id=? LIMIT 1",
             data = [helper.sanitize(id)];
         connection.query(query,data)
@@ -29,6 +29,12 @@ exports.userIdParam = function(req,res,next,id){
                 console.log("err ",err);
                 error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                 return next(error);
+            })
+            .finally(function() {
+                if (connection){
+                    pool.releaseConnection(connection);
+                    console.log("Connection released!");
+                }
             });
     },function(err){
         error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});
@@ -39,7 +45,7 @@ exports.userIdParam = function(req,res,next,id){
 
 exports.mobileParam = function(req,res,next,mobileNo){
     var error = {};
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         var query = "SELECT * FROM mobile_users WHERE mobile=? LIMIT 1",
             data = [helper.sanitize(mobileNo)];
         connection.query(query,data)
@@ -57,6 +63,12 @@ exports.mobileParam = function(req,res,next,mobileNo){
                 console.log("err ",err);
                 error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                 return next(error);
+            })
+            .finally(function() {
+                if (connection){
+                    pool.releaseConnection(connection);
+                    console.log("Connection released!");
+                }
             });
     },function(err){
         error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});
@@ -66,7 +78,7 @@ exports.mobileParam = function(req,res,next,mobileNo){
 
 exports.emailParam = function(req,res,next,email){
     var error = {};
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         var query = "SELECT * FROM mobile_users WHERE email=? LIMIT 1",
             data = [helper.sanitize(email)];
         connection.query(query,data)
@@ -84,6 +96,12 @@ exports.emailParam = function(req,res,next,email){
                 console.log("err ",err);
                 error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                 return next(error);
+            })
+            .finally(function() {
+                if (connection){
+                    pool.releaseConnection(connection);
+                    console.log("Connection released!");
+                }
             });
     },function(err){
         error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});
@@ -100,7 +118,7 @@ exports.getUser = function(req,res,next){
 exports.all = function(req,res,next){
     var error = {},
         meta = {success:true,status_code:200};
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         var query = "SELECT * FROM mobile_users";
         connection.query(query)
             .then(function(rows){
@@ -109,6 +127,12 @@ exports.all = function(req,res,next){
                 console.log("err ",err);
                 error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                 return next(error);
+            })
+            .finally(function() {
+                if (connection){
+                    pool.releaseConnection(connection);
+                    console.log("Connection released!");
+                }
             });
     },function(err){
         console.log("db error ",err);
@@ -124,7 +148,7 @@ exports.updateUser = function(req,res,next){
     var user = req.user;
     var error = {},
         meta = {success:true,status_code:200};
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         _.extend(user,req.body);
         var data = [user.first_name,user.last_name,user.mobile,user.avatar,user.gender,user.lga_id,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),userId],
             query = 'UPDATE mobile_users SET first_name=?,last_name=?,mobile=?,avatar=?,gender=?,lga_id=?,updated_at=? WHERE mobile_user_id=?';
@@ -142,6 +166,12 @@ exports.updateUser = function(req,res,next){
                 console.log("err ",err);
                 error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                 return next(error);
+            })
+            .finally(function() {
+                if (connection){
+                    pool.releaseConnection(connection);
+                    console.log("Connection released!");
+                }
             });
     },function(err){
         error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});
@@ -188,7 +218,7 @@ exports.getUserReportsById = function(req,res,next){
         var countQuery  = 'SELECT COUNT(report_id) as count FROM reports WHERE mobile_user_id = ? AND spam = ?';
         var countData = [mobileUserId,0];
 
-        mysqlConnection.get()
+        pool.getConnection()
             .then(function(connection){
                 return connection.query(query,queryData)
                 .then(function (rows) {
@@ -209,6 +239,12 @@ exports.getUserReportsById = function(req,res,next){
                     console.log("err ",err);
                     error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                     return next(error);
+                })
+                .finally(function() {
+                    if (connection){
+                        pool.releaseConnection(connection);
+                        console.log("Connection released!");
+                    }
                 });
         }
         ,function(err){
@@ -230,7 +266,7 @@ exports.saveUser = function (req,res,next) {
         var validator = new ValidatorJs(obj,rules);
         if(validator.passes())
         {
-            mysqlConnection.get().then(function(connection){
+            pool.getConnection().then(function(connection){
                 var data = [obj.first_name,obj.last_name,obj.email,obj.mobile,obj.avatar,obj.gender,dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss"),dateFormat(new Date(), "yyyy-mm-dd hh:MM:ss")],
                 query = 'INSERT INTO mobile_users(first_name,last_name,email,mobile,avatar,gender,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)';
 
@@ -242,6 +278,12 @@ exports.saveUser = function (req,res,next) {
                         console.log("err ",err);
                         error =  helper.transformToError({code:503,message:"Error in server interaction, please try again",extra:err});
                         return next(error);
+                    })
+                    .finally(function() {
+                        if (connection){
+                            pool.releaseConnection(connection);
+                            console.log("Connection released!");
+                        }
                     });
             },function(err){
                 error = helper.transformToError({code: 503, message: "Problem connecting to database", extra: err});

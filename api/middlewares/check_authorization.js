@@ -1,7 +1,7 @@
 /**
  * Created by Richard on 10/8/2015.
  */
-var mysqlConnection = require('../others/db/mysql_connection');
+var pool = require('../others/db/mysql_connection');
 var helper = require('../utils/helper');
 
 module.exports = function(req,res,next){
@@ -11,7 +11,7 @@ module.exports = function(req,res,next){
       {
           var api_id = helper.sanitize(req.body.api_id),
               api_key = helper.sanitize(req.body.api_key);
-          mysqlConnection.get().then(function(connection){
+          pool.getConnection().then(function(connection){
               var query = "SELECT * FROM api_keys WHERE api_id=? AND api_key=? LIMIT 1",
                   data = [api_id,api_key];
               connection.query(query,data)
@@ -34,7 +34,7 @@ module.exports = function(req,res,next){
                   })
                   .finally(function() {
                       if (connection){
-                          connection.connection.release();
+                          pool.releaseConnection(connection);
                           console.log("Connection released!");
                       }
                   });

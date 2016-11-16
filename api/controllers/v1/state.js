@@ -4,13 +4,13 @@
 var helper = require('../../utils/helper');
 var config = require('config');
 var formatResponse = require('../../utils/format-response');
-var mysqlConnection = require('../../others/db/mysql_connection');
+var pool = require('../../others/db/mysql_connection');
 
 exports.stateIdParam = function(req,res,next,id){
     var error = {};
     var query = 'SELECT * FROM states WHERE state_id=? LIMIT 1';
     var data = [helper.sanitize(id)];
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         connection.query(query,data)
             .then(function(rows){
                 if(rows.length){
@@ -29,7 +29,7 @@ exports.stateIdParam = function(req,res,next,id){
             })
             .finally(function() {
                 if (connection){
-                    connection.connection.release();
+                    pool.releaseConnection(connection);
                     console.log("Connection released!");
                 }
             });
@@ -45,7 +45,7 @@ exports.lgasByState = function(req,res,next){
     var stateId = req.state.state_id;
     var query = 'SELECT * FROM lgas WHERE state_id=?';
     var data = [stateId];
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         connection.query(query,data)
             .then(function(rows){
                 res.status(meta.code).json(formatResponse.do(meta,rows));
@@ -56,7 +56,7 @@ exports.lgasByState = function(req,res,next){
             })
             .finally(function() {
                 if (connection){
-                    connection.connection.release();
+                    pool.releaseConnection(connection);
                     console.log("Connection released!");
                 }
             });
@@ -71,7 +71,7 @@ exports.allStates = function(req,res,next){
     var error = {};
     var meta = {code:200,success:true};
     var query = 'SELECT * FROM states';
-    mysqlConnection.get().then(function(connection){
+    pool.getConnection().then(function(connection){
         connection.query(query)
             .then(function(rows){
                 res.status(meta.code).json(formatResponse.do(meta,rows));
@@ -82,7 +82,7 @@ exports.allStates = function(req,res,next){
             })
             .finally(function() {
                 if (connection){
-                    connection.connection.release();
+                    pool.releaseConnection(connection);
                     console.log("Connection released!");
                 }
             });
