@@ -254,7 +254,7 @@ exports.getUserReportsById = function(req,res,next){
 };
 
 exports.saveUser = function (req,res,next) {
-       var obj = req.obj,
+       var obj = req.body,
            error = {};
         var rules = {
             first_name: 'required',

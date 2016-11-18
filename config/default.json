@@ -16,10 +16,10 @@
     },
     "db": {
         "mysql": {
-            "host":"45.40.137.227",
-            "database":"rcecilee_pleg",
-            "username":"rcecilee_pleg",
-            "password":"rcecilee_pleg"
+            "host":"198.1.71.146",
+            "database":"pledgeni_pledge",
+            "username":"pledgeni_rollar",
+            "password":"Pledge_2016???"
         }
     },
 
